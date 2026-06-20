@@ -51,13 +51,12 @@ void GrafoBase::agregarRuta(int inicio, int fin, string nombreArista, int t, int
     nueva.costo = c;
     rutas.push_back(nueva);
 
-    // Cada vez que se agrega algo desde la terminal, se guarda de inmediato
-    // para que quede reflejado en el JSON al instante.
+    
     guardarEnArchivo();
 }
 
 void GrafoBase::mostrarRutas() {
-    // Antes de mostrar, releemos el archivo por si fue editado a mano
+    
     cargarDesdeArchivo();
 
     if (rutas.empty()) {
@@ -72,7 +71,7 @@ void GrafoBase::mostrarRutas() {
 }
 
 void GrafoBase::calcularDijkstra(int origen, bool porCosto) {
-    // Releemos el archivo antes de calcular, por si el JSON cambio a mano
+    
     cargarDesdeArchivo();
 
     if (!nodoExiste(origen)) {
@@ -80,9 +79,7 @@ void GrafoBase::calcularDijkstra(int origen, bool porCosto) {
         return;
     }
 
-    // Mapeo ID real -> indice interno (0..m-1). Asi la matriz solo depende
-    // de CUANTOS nodos hay (m = nodos.size()), no de que tan grande sea su ID.
-    // Por ejemplo, los nodos {1, 120} usan una matriz 2x2, no 121x121.
+    
     int m = (int)nodos.size();
     map<int, int> idAIndice;
     for (int i = 0; i < m; i++) {
@@ -133,9 +130,7 @@ void GrafoBase::calcularDijkstra(int origen, bool porCosto) {
     cout << "Nodo Origen: " << origen
          << (porCosto ? " | Criterio: Costo ($)\n" : " | Criterio: Tiempo (min)\n");
 
-    // Guardamos el resultado para poder exportarlo despues.
-    // ultDistancias/ultAlcanzable se mantienen indexados por ID real (no por
-    // indice interno), igual que antes, para no afectar generarTXT/JSON/CSV/XML.
+    
     int maxId = maxNodoId();
     int tam = (maxId < 0) ? 1 : maxId + 1;
 
@@ -151,8 +146,7 @@ void GrafoBase::calcularDijkstra(int origen, bool porCosto) {
         ultAlcanzable[idReal] = (dist[i] != INT_MAX);
     }
 
-    // Variables para detectar el destino mas cercano y el mas lejano
-    // (sin contar el propio nodo origen, que siempre tiene distancia 0).
+    
     bool hayDestinos = false;
     int  idMasCercano = -1, distMasCercano = INT_MAX;
     int  idMasLejano  = -1, distMasLejano  = -1;
@@ -192,14 +186,7 @@ void GrafoBase::calcularDijkstra(int origen, bool porCosto) {
 }
 
 
-// ================= ENUMERACION DE TODAS LAS RUTAS ENTRE DOS NODOS =================
-// A diferencia de Dijkstra (que solo da el camino OPTIMO), aqui se buscan TODOS
-// los caminos simples (sin repetir nodo) que existen entre un origen y un
-// destino especifico, usando un recorrido DFS con backtracking. Al final se
-// indica cual de esos caminos encontrados es el mas corto y cual el mas largo.
 
-// Funcion auxiliar recursiva: va construyendo un camino nodo por nodo.
-// 'adyacencia' guarda, para cada nodo, la lista de (vecino, peso, nombreArista).
 static void buscarCaminosDFS(
     int actual,
     int destino,
@@ -217,7 +204,7 @@ static void buscarCaminosDFS(
     caminoActual.push_back(actual);
 
     if (actual == destino) {
-        // Llegamos al destino: registramos este camino completo
+        
         todosLosCaminos.push_back(caminoActual);
         todosLosPesosPorTramo.push_back(pesoActual);
         todosLosNombresPorTramo.push_back(aristaActual);
@@ -246,7 +233,7 @@ static void buscarCaminosDFS(
         }
     }
 
-    // Backtracking: liberamos el nodo actual para que pueda usarse en otras ramas
+    
     visitado[actual] = false;
     caminoActual.pop_back();
 }
@@ -263,7 +250,7 @@ void GrafoBase::enumerarTodasLasRutas(int origen, int destino, bool porCosto) {
         return;
     }
 
-    // Construimos la lista de adyacencia con el peso elegido (tiempo o costo)
+    
     map<int, vector<tuple<int,int,string>>> adyacencia;
     for (size_t i = 0; i < rutas.size(); i++) {
         int u = rutas[i].nodoInicial;
@@ -317,7 +304,7 @@ void GrafoBase::enumerarTodasLasRutas(int origen, int destino, bool porCosto) {
         cout << "\n  Total: " << todosLosPesosTotales[r] << (porCosto ? " pesos" : " min") << "\n";
     }
 
-    // Buscamos cual de todas estas rutas encontradas es la mas corta y la mas larga
+    
     int idxMasCorta = 0, idxMasLarga = 0;
     for (size_t r = 1; r < todosLosPesosTotales.size(); r++) {
         if (todosLosPesosTotales[r] < todosLosPesosTotales[idxMasCorta]) idxMasCorta = (int)r;
@@ -334,11 +321,7 @@ void GrafoBase::enumerarTodasLasRutas(int origen, int destino, bool porCosto) {
 }
 
 
-// ================= PERSISTENCIA (datos_grafo.json / datos_digrafo.json) =================
-// Este archivo guarda nodos y rutas. Es la fuente de verdad: el programa lo lee
-// al iniciar y cada vez que agregas algo desde la terminal lo vuelve a escribir.
-// Si lo editas a mano (mientras el programa no esta corriendo, o antes de la
-// siguiente accion), el programa relee esos cambios.
+
 
 void GrafoBase::guardarEnArchivo() {
     ofstream archivo(archivoDatos);
@@ -369,11 +352,7 @@ void GrafoBase::guardarEnArchivo() {
     archivo.close();
 }
 
-// Parser sencillo hecho a mano: busca los campos por nombre dentro del texto.
-// No es un parser JSON general, pero entiende el formato exacto que este
-// programa escribe, asi que es suficiente para que edites valores a mano
-// (cambiar un numero, agregar un objeto de ruta copiando el patron, etc.)
-// sin romper la lectura.
+
 static string extraerValorString(const string& bloque, const string& clave) {
     string buscar = "\"" + clave + "\"";
     size_t pos = bloque.find(buscar);
@@ -470,12 +449,7 @@ void GrafoBase::cargarDesdeArchivo() {
 }
 
 
-// ================= EXPORTACION DE RESULTADOS (reportes de solo lectura) =================
-// generarTXT/CSV/XML siguen siendo reportes combinados (nodos + rutas + dijkstra)
-// para lectura humana. generarJSON, en cambio, ahora escribe SOLO el resultado
-// de Dijkstra en un archivo separado (archivoResultados), totalmente distinto
-// del archivo de persistencia (archivoDatos), que solo contiene nodos y rutas
-// y se mantiene intacto al exportar.
+
 
 void GrafoBase::generarTXT() {
     cargarDesdeArchivo();
@@ -516,11 +490,7 @@ void GrafoBase::generarTXT() {
 }
 
 void GrafoBase::generarJSON() {
-    // Este metodo ya NO toca el archivo de datos (datos_grafo.json /
-    // datos_digrafo.json). Ese archivo es exclusivamente nodos + rutas y solo
-    // lo escribe guardarEnArchivo(). Aqui solo se escribe el archivo de
-    // RESULTADOS (resultados_grafo.json / resultados_digrafo.json), que
-    // contiene unicamente el ultimo calculo de Dijkstra.
+    
     cargarDesdeArchivo();
     ofstream archivo(archivoResultados);
 
