@@ -1,0 +1,55 @@
+{
+  "tipoGrafo": "Grafo",
+  "nodos": [5, 90, 40, 500, 80, 22, 88, 10, 33, 777, 60, 87],
+  "rutas": [
+    {
+      "arista": "A",
+      "nodoInicial": 5,
+      "nodoFinal": 90,
+      "tiempo": 1,
+      "costo": 100
+    },
+    {
+      "arista": "B",
+      "nodoInicial": 90,
+      "nodoFinal": 500,
+      "tiempo": 2,
+      "costo": 200
+    },
+    {
+      "arista": "C",
+      "nodoInicial": 80,
+      "nodoFinal": 90,
+      "tiempo": 4,
+      "costo": 400
+    },
+    {
+      "arista": "a",
+      "nodoInicial": 22,
+      "nodoFinal": 88,
+      "tiempo": 2,
+      "costo": 500
+    },
+    {
+      "arista": "b",
+      "nodoInicial": 10,
+      "nodoFinal": 90,
+      "tiempo": 5,
+      "costo": 600
+    },
+    {
+      "arista": "c",
+      "nodoInicial": 33,
+      "nodoFinal": 777,
+      "tiempo": 4,
+      "costo": 200
+    },
+    {
+      "arista": "d",
+      "nodoInicial": 60,
+      "nodoFinal": 87,
+      "tiempo": 3,
+      "costo": 100
+    }
+  ]
+}
