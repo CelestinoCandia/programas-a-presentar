@@ -8,10 +8,7 @@ void ejecutarSimulacion(GrafoBase* mapa) {
     int opcion;
 
     do {
-        // Antes de mostrar el menu, releemos el archivo de datos por si fue
-        // editado a mano mientras el programa seguia corriendo. Asi cualquier
-        // cambio en el JSON se refleja de inmediato, sin tener que cerrar y
-        // volver a abrir el programa.
+        
         mapa->cargarDesdeArchivo();
 
         cout << "\n--- MENU DE LOGISTICA Y RUTAS ---\n";
